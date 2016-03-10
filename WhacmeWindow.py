@@ -15,14 +15,14 @@ class WhacmeWindow(tk.Frame):
 			mainWeight=2, mainColor='#ffffea', mainDarkColor='#99994c', mainHighlightColor='#eeee9e',                          \
 			sideWeight=1, sideColor='#eaffea', sideDarkColor='#4c994c', sideHighlightColor='#9eee9e',                          \
 			               tagColor='#eaffff',  tagDarkColor='#8888cc',  tagHighlightColor='#9eeeee', tagEditedColor='#000099',\
-			tagText=' Save Undo Redo | Find \nHaskell Python LaTeX | Apply ',                                                  \
+			tagText='Save Undo Redo | Find \nHaskell Python LaTeX | Apply ',                                                  \
 			borderColor='#000000', scrollWidth=12,                                                                             \
 			*args, **kwargs):
 
 		tk.Frame.__init__(self, parent, *args, **kwargs)
 		
 		self.parent = parent
-		self.path = os.path.abspath(path)
+		self.path = path
 
 		# set and increment the id
 		self.id = WhacmeWindow.id
@@ -38,7 +38,7 @@ class WhacmeWindow(tk.Frame):
 		self.editedColor = tagEditedColor
 		
 		# build the text areas
-		self.tag      = WhacmeText.WhacmeText(window=self, color= tagColor, darkColor=tagDarkColor,  highlightColor=tagHighlightColor,  outlineColor=borderColor, isTag=True,  decorationWidth=scrollWidth, text=tagText)
+		self.tag      = WhacmeText.WhacmeText(window=self, color= tagColor, darkColor=tagDarkColor,  highlightColor=tagHighlightColor,  outlineColor=borderColor, isTag=True,  decorationWidth=scrollWidth, text='  ' +tagText)
 		self.mainText = WhacmeText.WhacmeText(window=self, color=mainColor, darkColor=mainDarkColor, highlightColor=mainHighlightColor, outlineColor=borderColor, isTag=False, decorationWidth=scrollWidth)
 		self.sideText = WhacmeText.WhacmeText(window=self, color=sideColor, darkColor=sideDarkColor, highlightColor=sideHighlightColor, outlineColor=borderColor, isTag=False, decorationWidth=scrollWidth)
 		
@@ -51,4 +51,5 @@ class WhacmeWindow(tk.Frame):
 		self.cmd = cmdClass(self)
 		
 		# finally, open up whatever we've been sent as a path
+		self.cmd.openLocation(path)
 

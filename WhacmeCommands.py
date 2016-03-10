@@ -25,14 +25,18 @@ class WhacmeCommands():
 		self.owner.sideText.text.bind('<<Modified>>', self.modified)
 
 	def commandClick(self, event):
-		txt = self.getCommand(event)
+		cmd = self.getCommand(event)
 
+		# exit on empty clicks or the left button
+		if cmd == '':
+			return
 		if event.num == 1:
-			return		
-		elif event.num == 2:
-			self.runCommand(txt)
+			return	
+	
+		if event.num == 2:
+			self.runCommand(cmd)
 		elif event.num == 3:
-			self.openLocation(txt)
+			self.openLocation(cmd)
 	
 	def getCommand(self, event):
 		mouseIndex = event.widget.index('@%s,%s' % (event.x, event.y))
@@ -82,11 +86,40 @@ class WhacmeCommands():
 		self.owner.sideText.text.tag_remove('highlightText', '1.0', 'end')
 
 	def openLocation(self, loc):
-		# if not an absolute path
+		# if we currently have a file as the path, back up before working 
+		if os.path.isfile(self.owner.path):
+			self.owner.path = os.path.dirname(self.owner.path)
+
 		if not loc[0] == '/':
-			if not self.owner.path[-1] == '/':
-				self.owner.path = self.owner.path + '/' + loc
-			else:
-				self.owner.path = self.owner.path + loc
+			self.owner.path = os.path.realpath(self.owner.path + '/' + loc)
 		else:
-			self.owner.path = loc
+			self.owner.path = os.path.realpath(loc)
+		
+		if os.path.isdir(self.owner.path):
+			# put the directory listing in the side area
+			self.owner.sideText.text.delete('1.0', 'end')
+			self.owner.sideText.text.insert('1.0', subprocess.check_output("ls -F " + self.owner.path, shell=True))
+			self.owner.sideText.text.insert('1.0', '..\n')
+		else:
+			# load the file in main - it is fine if it doesn't exist, since it will be created later when saving it
+			try:
+				inFile = open(self.owner.path, 'r')
+				self.owner.mainText.text.delete('1.0', 'end')
+				self.owner.mainText.text.insert('1.0', inFile.read())
+			except IOError as e:
+				pass
+			
+			# display the directory on the side
+			self.owner.sideText.text.delete('1.0', 'end')
+			self.owner.sideText.text.insert('1.0', subprocess.check_output("ls -F " + os.path.dirname(self.owner.path), shell=True))
+			self.owner.sideText.text.insert('1.0', '..\n')
+
+		# then update the path displayed in the tag
+		lEnd = int(self.owner.tag.text.index('1.0 lineend').split('.')[1])
+		right = 1
+		rChar = self.owner.tag.text.get('1.0', '1.1')
+		while (right <= lEnd) and (not rChar.isspace()):
+			right += 1
+			rChar = self.owner.tag.text.get('1.%s' % right, '1.%s' % (right + 1))
+		self.owner.tag.text.delete('1.0', '1.%s' % right)
+		self.owner.tag.text.insert('1.0', self.owner.path)
