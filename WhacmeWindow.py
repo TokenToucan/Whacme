@@ -39,13 +39,13 @@ class WhacmeWindow(tk.Frame):
 		
 		# build the text areas
 		self.tag      = WhacmeText.WhacmeText(window=self, color= tagColor, darkColor=tagDarkColor,  highlightColor=tagHighlightColor,  outlineColor=borderColor, isTag=True,  decorationWidth=scrollWidth, text='  ' +tagText)
-		self.mainText = WhacmeText.WhacmeText(window=self, color=mainColor, darkColor=mainDarkColor, highlightColor=mainHighlightColor, outlineColor=borderColor, isTag=False, decorationWidth=scrollWidth)
-		self.sideText = WhacmeText.WhacmeText(window=self, color=sideColor, darkColor=sideDarkColor, highlightColor=sideHighlightColor, outlineColor=borderColor, isTag=False, decorationWidth=scrollWidth)
+		self.main = WhacmeText.WhacmeText(window=self, color=mainColor, darkColor=mainDarkColor, highlightColor=mainHighlightColor, outlineColor=borderColor, isTag=False, decorationWidth=scrollWidth)
+		self.side = WhacmeText.WhacmeText(window=self, color=sideColor, darkColor=sideDarkColor, highlightColor=sideHighlightColor, outlineColor=borderColor, isTag=False, decorationWidth=scrollWidth)
 		
 		# grid each of the areas now
 		self.tag.grid     (row=0, column=0, sticky=ALL, columnspan=2)
-		self.mainText.grid(row=1, column=0, sticky=ALL)
-		self.sideText.grid(row=1, column=1, sticky=ALL)
+		self.main.grid(row=1, column=0, sticky=ALL)
+		self.side.grid(row=1, column=1, sticky=ALL)
 
 		# set up the command object for the window - this allows customization of the options available
 		self.cmd = cmdClass(self)

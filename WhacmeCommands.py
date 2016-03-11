@@ -15,12 +15,12 @@ class WhacmeCommands():
 		self.owner.tag.text.bind('<Button>', self.commandClick)
 		self.owner.tag.text.bind('<<PasteSelection>>', lambda e: 'break')
 		
-		self.owner.mainText.text.bind('<Button>', self.commandClick)
-		self.owner.mainText.text.bind('<<PasteSelection>>', lambda e: 'break')
-		self.owner.mainText.text.bind('<<Modified>>', self.modified)
+		self.owner.main.text.bind('<Button>', self.commandClick)
+		self.owner.main.text.bind('<<PasteSelection>>', lambda e: 'break')
+		self.owner.main.text.bind('<<Modified>>', self.modified)
 		
-		self.owner.sideText.text.bind('<Button>', self.commandClick)
-		self.owner.sideText.text.bind('<<PasteSelection>>', lambda e: 'break')
+		self.owner.side.text.bind('<Button>', self.commandClick)
+		self.owner.side.text.bind('<<PasteSelection>>', lambda e: 'break')
 
 	def commandClick(self, event):
 		cmd = self.getCommand(event)
@@ -80,11 +80,12 @@ class WhacmeCommands():
 		
 		# clear highlighted things (done by Find etc.)
 		self.owner.tag.text.tag_remove('highlightText', '1.0', 'end')
-		self.owner.mainText.text.tag_remove('highlightText', '1.0', 'end')
-		self.owner.sideText.text.tag_remove('highlightText', '1.0', 'end')
+		self.owner.main.text.tag_remove('highlightText', '1.0', 'end')
+		self.owner.side.text.tag_remove('highlightText', '1.0', 'end')
 
 	def openLocation(self, loc):
-		# if we currently have a file as the path, back up before working 
+		# if we currently have a file as the path, back up before working
+		oldPath = self.owner.path
 		if os.path.isfile(self.owner.path):
 			self.owner.path = os.path.dirname(self.owner.path)
 
@@ -95,22 +96,22 @@ class WhacmeCommands():
 		
 		if os.path.isdir(self.owner.path):
 			# put the directory listing in the side area
-			self.owner.sideText.text.delete('1.0', 'end')
-			self.owner.sideText.text.insert('1.0', subprocess.check_output("ls -F " + self.owner.path, shell=True))
-			self.owner.sideText.text.insert('1.0', '..\n')
-		else:
+			self.owner.side.text.delete('1.0', 'end')
+			self.owner.side.text.insert('1.0', subprocess.check_output("ls -F " + self.owner.path, shell=True))
+			self.owner.side.text.insert('1.0', '..\n')
+		elif os.path.isfile(self.owner.path):
 			# load the file in main - it is fine if it doesn't exist, since it will be created later when saving it
-			try:
-				inFile = open(self.owner.path, 'r')
-				self.owner.mainText.text.delete('1.0', 'end')
-				self.owner.mainText.text.insert('1.0', inFile.read())
-			except IOError as e:
-				pass
+			inFile = open(self.owner.path, 'r')
+			self.owner.main.text.delete('1.0', 'end')
+			self.owner.main.text.insert('1.0', inFile.read())
 			
 			# display the directory on the side
-			self.owner.sideText.text.delete('1.0', 'end')
-			self.owner.sideText.text.insert('1.0', subprocess.check_output("ls -F " + os.path.dirname(self.owner.path), shell=True))
-			self.owner.sideText.text.insert('1.0', '..\n')
+			self.owner.side.text.delete('1.0', 'end')
+			self.owner.side.text.insert('1.0', subprocess.check_output("ls -F " + os.path.dirname(self.owner.path), shell=True))
+			self.owner.side.text.insert('1.0', '..\n')
+		else:
+			# ignore anything else, back up to normal path
+			self.owner.path = oldPath
 
 		# then update the path displayed in the tag
 		lEnd = int(self.owner.tag.text.index('1.0 lineend').split('.')[1])
@@ -135,16 +136,16 @@ class WhacmeCommands():
 		outFile = open(tagPath, 'w')
 		errFile = open(tagPath + '+err', 'w')
 		
-		outFile.write(u'%s' % self.owner.mainText.text.get('1.0', 'end'))
-		errFile.write(u'%s' % self.owner.sideText.text.get('1.0', 'end'))
+		outFile.write(u'%s' % self.owner.main.text.get('1.0', 'end'))
+		errFile.write(u'%s' % self.owner.side.text.get('1.0', 'end'))
 		
 		self.owner.tag.indicator.configure(bg=self.owner.tag.darkColor)
 
 	def undo(self):
-		self.owner.mainText.text.edit_undo()
+		self.owner.main.text.edit_undo()
 
 	def redo(self):
-		self.owner.mainText.text.edit_redo()
+		self.owner.main.text.edit_redo()
 	
 	def find(self, args):
 		# remove the initial 'Find' keyword to get the search pattern
@@ -156,7 +157,7 @@ class WhacmeCommands():
 		# loop through the text and mark what needs to be highlighted
 		# TODO: implement scrollbar marking
 		while True:
-			lIndex = self.owner.mainText.text.search(pattern, start, stopindex='end', count=cnt)
+			lIndex = self.owner.main.text.search(pattern, start, stopindex='end', count=cnt)
 			rIndex = '%s+%sc' % (lIndex, cnt.get())
 
 			# exit if we do not find anything
@@ -164,13 +165,13 @@ class WhacmeCommands():
 				break
 		
 			# set highlight tag on the found text
-			self.owner.mainText.text.tag_add('highlightText', lIndex, rIndex)
+			self.owner.main.text.tag_add('highlightText', lIndex, rIndex)
 
 			# set the new start location
 			start = rIndex
 		
 		# set the highlighting on
-		self.owner.mainText.text.tag_configure('highlightText', background=self.owner.mainText.highlightColor)
+		self.owner.main.text.tag_configure('highlightText', background=self.owner.main.highlightColor)
 
 	def runCommand(self, cmd):
 		splitCmd = cmd.split(' ')
@@ -194,8 +195,8 @@ class WhacmeCommands():
 		# execute whatever it is, giving it the window id when it is not a special command
 		# currently doesn't fork or anything nice, just dumps output into the out box
 		else:
-			self.owner.sideText.text.insert('1.0', '###################\n')
-			self.owner.sideText.text.insert('1.0', subprocess.check_output('winid=' + self.owner.id + ' && ' + cmd, shell=True))
+			self.owner.side.text.insert('1.0', '###################\n')
+			self.owner.side.text.insert('1.0', subprocess.check_output('winid=' + self.owner.id + ' && ' + cmd, shell=True))
 
 
 			
