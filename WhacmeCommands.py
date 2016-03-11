@@ -14,6 +14,8 @@ class WhacmeCommands():
 		
 		self.owner.tag.text.bind('<Button>', self.commandClick)
 		self.owner.tag.text.bind('<<PasteSelection>>', lambda e: 'break')
+		self.owner.tag.indicator.bind('<ButtonPress-1>', self.resizeDown)
+		self.owner.tag.indicator.bind('<ButtonRelease-1>', self.resizeUp)
 		
 		self.owner.main.text.bind('<Button>', self.commandClick)
 		self.owner.main.text.bind('<<PasteSelection>>', lambda e: 'break')
@@ -21,6 +23,18 @@ class WhacmeCommands():
 		
 		self.owner.side.text.bind('<Button>', self.commandClick)
 		self.owner.side.text.bind('<<PasteSelection>>', lambda e: 'break')
+	
+	def resizeDown(self, event):
+		# change the cursor to a box
+		event.widget.configure(cursor='dotbox')
+
+		# set initial position for the resize
+	
+	def resizeUp(self, event):
+		# return cursor to normal
+		event.widget.configure(cursor='X_cursor')
+
+		# calculate weight changes needed to bring the button under/near the new position
 
 	def commandClick(self, event):
 		cmd = self.getCommand(event)
