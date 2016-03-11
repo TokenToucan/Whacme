@@ -123,13 +123,47 @@ class WhacmeCommands():
 		self.owner.tag.text.insert('1.0', self.owner.path)
 
 	def runCommand(self, cmd):
+		splitCmd = cmd.split(' ')
 		if cmd[0].isupper():
-			return
+			if   splitCmd[0] == 'Save':
+				self.save()
+			elif splitCmd[0] == 'Undo':
+				self.undo()
+			elif splitCmd[0] == 'Redo':
+				self.redo()
+			elif splitCmd[0] == 'Find':
+				self.find(splitCmd)
+			elif splitCmd[0] == 'Haskell':
+				self.haskell()
+			elif splitCmd[0] == 'Python':
+				self.python()
+			elif splitCmd[0] == 'LaTeX':
+				self.latex()
+			elif splitCmd[0] == 'Apply':
+				self.apply(splitCmd)
 		# execute whatever it is, giving it the window id when it is not a special command
 		# currently doesn't fork or anything nice, just dumps output into the out box
 		else:
 			self.owner.sideText.text.insert('1.0', '###################\n')
 			self.owner.sideText.text.insert('1.0', subprocess.check_output('winid=' + self.owner.id + ' && ' + cmd, shell=True))
+	
+	def save(self):
+		# get the path in the tag - this is if you want to change the filename before saving
+		lEnd = int(self.owner.tag.text.index('1.0 lineend').split('.')[1])
+		right = 1
+		rChar = self.owner.tag.text.get('1.0', '1.1')
+		while (right <= lEnd) and (not rChar.isspace()):
+			right += 1
+			rChar = self.owner.tag.text.get('1.%s' % right, '1.%s' % (right + 1))
+		tagPath = os.path.realpath(self.owner.tag.text.get('1.0', '1.%s' % right))
+		
+		outFile = open(tagPath, 'w')
+		errFile = open(tagPath + '+err', 'w')
+		
+		outFile.write(u'%s' % self.owner.mainText.text.get('1.0', 'end'))
+		errFile.write(u'%s' % self.owner.sideText.text.get('1.0', 'end'))
+		
+		self.owner.tag.indicator.configure(bg=self.owner.tag.darkColor)
 
 
 			
