@@ -230,7 +230,18 @@ class WhacmeCommands():
 			# peel off trailing newline
 			pdfWindow = pdfWindow[:-1]
 			subprocess.call('xdotool key --clearmodifiers --window ' + pdfWindow + ' r', shell=True)
-
+	
+	def apply(self, args):
+		# condense the arguments
+		cmd = reduce(lambda x,y: x + ' ' + y, args[1:], '')
+		
+		# run the command in the shell with the variable
+		inText = self.owner.main.text.get('1.0', 'end')
+		outText = subprocess.Popen('text=\"' + inText + '\" && ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+		
+		self.owner.main.text.delete('1.0', 'end')
+		self.owner.main.text.insert('1.0', outText)
+	
 	def runCommand(self, cmd):
 		splitCmd = cmd.split(' ')
 		if cmd[0].isupper():
@@ -253,8 +264,9 @@ class WhacmeCommands():
 		# execute whatever it is, giving it the window id when it is not a special command
 		# currently doesn't fork or anything nice, just dumps output into the out box
 		else:
-			self.owner.side.text.insert('1.0', '###################\n')
-			self.owner.side.text.insert('1.0', subprocess.check_output('winid=' + str(self.owner.id) + ' && ' + cmd, shell=True))
+			self.owner.side.text.insert('1.0', '##################\n')
+			self.owner.side.text.insert('1.0', subprocess.Popen('winid=' + str(self.owner.id) + ' && ' + cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0])
+			self.owner.side.text.insert('1.0', '###SHELL OUTPUT###\n')
 
 
 			
