@@ -203,17 +203,19 @@ class WhacmeCommands():
 		self.owner.side.text.insert('1.0', latexProc.communicate()[0])
 		self.owner.side.text.insert('1.0', '###LATEX OUTPUT###\n')
 
-		#try:
-		#	subprocess.call('cp /tmp/whacme-pdf/' + pdfName + ' ' + dirPath + '/' + pdfName, shell=True)
-		#except subprocess.CalledProcessError, e:
-		#	pass
-		#else:
-		#	pdfWindow = subprocess.Popen('xdotool search --name ' + pdfName + ' | head -1', shell=True).communicate()[0]
-		#	if pdfWindow == '':
-		#		subprocess.call('mupdf ' + dirPath + '/' + pdfName + ' &', shell=True)
+		try:
+			subprocess.call('cp /tmp/whacme-pdf/' + pdfName + ' ' + dirPath + '/' + pdfName, shell=True)
+		except subprocess.CalledProcessError, e:
+			pass
+		else:
+			pdfWindow = subprocess.Popen('xdotool search --name ' + pdfName + ' | head -1', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+			if pdfWindow == '':
+				subprocess.call('mupdf ' + dirPath + '/' + pdfName + ' &', shell=True)
 
-		#	pdfWindow = subprocess.Popen('xdotool search --name ' + pdfName + ' | head -1', shell=True).communicate()[0]
-		#	subprocess.call('xdotool key --clearmodifiers -- window ' + pdfWindow + ' r')
+			pdfWindow = subprocess.Popen('xdotool search --name ' + pdfName + ' | head -1', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()[0]
+			# peel off trailing newline
+			pdfWindow = pdfWindow[:-1]
+			subprocess.call('xdotool key --clearmodifiers --window ' + pdfWindow + ' r', shell=True)
 
 	def runCommand(self, cmd):
 		splitCmd = cmd.split(' ')
@@ -238,7 +240,7 @@ class WhacmeCommands():
 		# currently doesn't fork or anything nice, just dumps output into the out box
 		else:
 			self.owner.side.text.insert('1.0', '###################\n')
-			self.owner.side.text.insert('1.0', subprocess.check_output('winid=' + self.owner.id + ' && ' + cmd, shell=True))
+			self.owner.side.text.insert('1.0', subprocess.check_output('winid=' + str(self.owner.id) + ' && ' + cmd, shell=True))
 
 
 			
