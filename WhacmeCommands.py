@@ -173,6 +173,44 @@ class WhacmeCommands():
 		# set the highlighting on
 		self.owner.main.text.tag_configure('highlightText', background=self.owner.main.highlightColor)
 
+	def haskell(self):
+		self.save()
+		self.owner.side.text.insert('1.0', '####################\n')
+		self.owner.side.text.insert('1.0', subprocess.check_output('runghc ' + self.owner.path, shell=True))
+		self.owner.side.text.insert('1.0', '###HASKELL OUTPUT###\n')
+
+	def python(self):
+		self.save()
+		self.owner.side.text.insert('1.0', '###################\n')
+		self.owner.side.text.insert('1.0', subprocess.check_output('python ' + self.owner.path, shell=True))
+		self.owner.side.text.insert('1.0', '###PYTHON OUTPUT###\n')
+
+	def latex(self):
+		# do not fiddle around if we are not currently working with a file
+		if os.path.isdir(self.owner.path):
+			return
+		
+		self.save()
+		subprocess.call("mkdir -p /tmp/whacme-pdf/", shell=True)
+
+		self.owner.side.text.insert('1.0', '####################\n')
+		try:
+			self.owner.side.text.insert('1.0', subprocess.check_output('pdflatex -output-directory=/tmp/whacme-pdf/ -interaction nonstopmode ' + self.owner.path, shell=True))
+		except Exception, e:
+			# don't let odd exit statuses hurt things, we can't handle it anyways
+			pass
+
+		try:
+			pdfName = self.owner.path.split('/')[-1].split('.')[0] + '.pdf'
+			
+			dirPath = os.path.dirname(self.owner.path)
+			subprocess.call('cp /tmp/whacme-pdf/' + pdfName + ' ' + dirPath + '/' + pdfName, shell=True)
+			subprocess.call('mupdf ' + dirPath + '/' + pdfName + ' &', shell=True)
+		except Exception, e:
+			pass
+		
+		self.owner.side.text.insert('1.0', '###LATEX OUTPUT###\n')
+
 	def runCommand(self, cmd):
 		splitCmd = cmd.split(' ')
 		if cmd[0].isupper():
