@@ -14,7 +14,6 @@ class WhacmeCommands():
 		
 		self.owner.tag.text.bind('<Button>', self.commandClick)
 		self.owner.tag.text.bind('<<PasteSelection>>', lambda e: 'break')
-		self.owner.tag.text.bind('<<Modified>>', self.modified)
 		
 		self.owner.mainText.text.bind('<Button>', self.commandClick)
 		self.owner.mainText.text.bind('<<PasteSelection>>', lambda e: 'break')
@@ -22,7 +21,6 @@ class WhacmeCommands():
 		
 		self.owner.sideText.text.bind('<Button>', self.commandClick)
 		self.owner.sideText.text.bind('<<PasteSelection>>', lambda e: 'break')
-		self.owner.sideText.text.bind('<<Modified>>', self.modified)
 
 	def commandClick(self, event):
 		cmd = self.getCommand(event)
@@ -123,3 +121,15 @@ class WhacmeCommands():
 			rChar = self.owner.tag.text.get('1.%s' % right, '1.%s' % (right + 1))
 		self.owner.tag.text.delete('1.0', '1.%s' % right)
 		self.owner.tag.text.insert('1.0', self.owner.path)
+
+	def runCommand(self, cmd):
+		if cmd[0].isupper():
+			return
+		# execute whatever it is, giving it the window id when it is not a special command
+		# currently doesn't fork or anything nice, just dumps output into the out box
+		else:
+			self.owner.sideText.text.insert('1.0', '###################\n')
+			self.owner.sideText.text.insert('1.0', subprocess.check_output('winid=' + self.owner.id + ' && ' + cmd, shell=True))
+
+
+			

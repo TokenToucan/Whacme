@@ -22,7 +22,7 @@ class WhacmeWindow(tk.Frame):
 		tk.Frame.__init__(self, parent, *args, **kwargs)
 		
 		self.parent = parent
-		self.path = path
+		self.path = os.path.abspath(path)
 
 		# set and increment the id
 		self.id = WhacmeWindow.id
