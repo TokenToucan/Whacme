@@ -7,21 +7,28 @@ class WhacmeCommands():
 	def __init__(self, owner):
 		self.owner = owner
 		self.setBindings()
+		
+		self.buttonOneDown = False
 
 	def setBindings(self):
 		# The <<PasteSelection>> must be bound to a break in order to allow middle clicking without pasting
 		# For event-orient commands, add a binding here. Most should be added to the commandClick function.
 		
-		self.owner.tag.text.bind('<Button>', self.commandClick)
+		
+		self.owner.main.text.bind('<Button-2>', self.runCommand)
+		self.owner.main.text.bind('<Button-3>', self.openLocation)
 		self.owner.tag.text.bind('<<PasteSelection>>', lambda e: 'break')
 		self.owner.tag.indicator.bind('<ButtonPress-1>', self.resizeDown)
 		self.owner.tag.indicator.bind('<ButtonRelease-1>', self.resizeUp)
 		
-		self.owner.main.text.bind('<Button>', self.commandClick)
+		self.owner.main.text.bind('<Button-2>', self.runCommand)
+		self.owner.main.text.bind('<Button-3>', self.openLocation)
 		self.owner.main.text.bind('<<PasteSelection>>', lambda e: 'break')
 		self.owner.main.text.bind('<<Modified>>', self.modified)
 		
-		self.owner.side.text.bind('<Button>', self.commandClick)
+		
+		self.owner.main.text.bind('<Button-2>', self.runCommand)
+		self.owner.main.text.bind('<Button-3>', self.openLocation)
 		self.owner.side.text.bind('<<PasteSelection>>', lambda e: 'break')
 	
 	def resizeDown(self, event):
@@ -35,20 +42,6 @@ class WhacmeCommands():
 		event.widget.configure(cursor='X_cursor')
 
 		# calculate weight changes needed to bring the button under/near the new position
-
-	def commandClick(self, event):
-		cmd = self.getCommand(event)
-
-		# exit on empty clicks or the left button
-		if cmd == '':
-			return
-		if event.num == 1:
-			return	
-	
-		if event.num == 2:
-			self.runCommand(cmd)
-		elif event.num == 3:
-			self.openLocation(cmd)
 	
 	def getCommand(self, event):
 		mouseIndex = event.widget.index('@%s,%s' % (event.x, event.y))
@@ -97,7 +90,9 @@ class WhacmeCommands():
 		self.owner.main.text.tag_remove('highlightText', '1.0', 'end')
 		self.owner.side.text.tag_remove('highlightText', '1.0', 'end')
 
-	def openLocation(self, loc):
+	def openLocation(self, event):
+		loc = getCommand(event)
+		
 		# if we currently have a file as the path, back up before working
 		oldPath = self.owner.path
 		if os.path.isfile(self.owner.path):
@@ -163,7 +158,7 @@ class WhacmeCommands():
 	
 	def find(self, args):
 		# remove the initial 'Find' keyword to get the search pattern
-		pattern = reduce(lambda x,y: x + y, args[1:], '')
+		pattern = reduce(lambda x,y: x + ' ' + y, args[1:], '')
 		
 		start = '1.0'
 		cnt = tk.IntVar()
@@ -243,6 +238,8 @@ class WhacmeCommands():
 		self.owner.main.text.insert('1.0', outText)
 	
 	def runCommand(self, cmd):
+		cmd = self.getCommand(event)
+
 		splitCmd = cmd.split(' ')
 		if cmd[0].isupper():
 			if   splitCmd[0] == 'Save':
