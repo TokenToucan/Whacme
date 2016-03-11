@@ -15,7 +15,7 @@ class WhacmeWindow(tk.Frame):
 			mainWeight=2, mainColor='#ffffea', mainDarkColor='#99994c', mainHighlightColor='#eeee9e',                          \
 			sideWeight=1, sideColor='#eaffea', sideDarkColor='#4c994c', sideHighlightColor='#9eee9e',                          \
 			               tagColor='#eaffff',  tagDarkColor='#8888cc',  tagHighlightColor='#9eeeee', tagEditedColor='#000099',\
-			tagText='Save Undo Redo | Find \nHaskell Python LaTeX | Apply ',                                                  \
+			tagText='Save Undo Redo | Find \nHaskell Python LaTeX | Apply ',                                                   \
 			borderColor='#000000', scrollWidth=12,                                                                             \
 			*args, **kwargs):
 
