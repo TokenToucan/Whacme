@@ -191,25 +191,29 @@ class WhacmeCommands():
 			return
 		
 		self.save()
+		pdfName = self.owner.path.split('/')[-1].split('.')[0] + '.pdf'
+		dirPath = os.path.dirname(self.owner.path)
+		pdfPath = dirPath + pdfName
+
 		subprocess.call("mkdir -p /tmp/whacme-pdf/", shell=True)
 
 		self.owner.side.text.insert('1.0', '####################\n')
-		try:
-			self.owner.side.text.insert('1.0', subprocess.check_output('pdflatex -output-directory=/tmp/whacme-pdf/ -interaction nonstopmode ' + self.owner.path, shell=True))
-		except Exception, e:
-			# don't let odd exit statuses hurt things, we can't handle it anyways
-			pass
+		latexProc = subprocess.Popen('pdflatex -output-directory=/tmp/whacme-pdf/ -interaction nonstopmode ' + self.owner.path, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-		try:
-			pdfName = self.owner.path.split('/')[-1].split('.')[0] + '.pdf'
-			
-			dirPath = os.path.dirname(self.owner.path)
-			subprocess.call('cp /tmp/whacme-pdf/' + pdfName + ' ' + dirPath + '/' + pdfName, shell=True)
-			subprocess.call('mupdf ' + dirPath + '/' + pdfName + ' &', shell=True)
-		except Exception, e:
-			pass
-		
+		self.owner.side.text.insert('1.0', latexProc.communicate()[0])
 		self.owner.side.text.insert('1.0', '###LATEX OUTPUT###\n')
+
+		#try:
+		#	subprocess.call('cp /tmp/whacme-pdf/' + pdfName + ' ' + dirPath + '/' + pdfName, shell=True)
+		#except subprocess.CalledProcessError, e:
+		#	pass
+		#else:
+		#	pdfWindow = subprocess.Popen('xdotool search --name ' + pdfName + ' | head -1', shell=True).communicate()[0]
+		#	if pdfWindow == '':
+		#		subprocess.call('mupdf ' + dirPath + '/' + pdfName + ' &', shell=True)
+
+		#	pdfWindow = subprocess.Popen('xdotool search --name ' + pdfName + ' | head -1', shell=True).communicate()[0]
+		#	subprocess.call('xdotool key --clearmodifiers -- window ' + pdfWindow + ' r')
 
 	def runCommand(self, cmd):
 		splitCmd = cmd.split(' ')
