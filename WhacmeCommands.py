@@ -15,8 +15,8 @@ class WhacmeCommands():
 		# For event-orient commands, add a binding here. Most should be added to the commandClick function.
 		
 		
-		self.owner.main.text.bind('<Button-2>', self.runCommand)
-		self.owner.main.text.bind('<Button-3>', self.openLocation)
+		self.owner.tag.text.bind('<Button-2>', self.runCommand)
+		self.owner.tag.text.bind('<Button-3>', self.openLocation)
 		self.owner.tag.text.bind('<<PasteSelection>>', lambda e: 'break')
 		self.owner.tag.indicator.bind('<ButtonPress-1>', self.resizeDown)
 		self.owner.tag.indicator.bind('<ButtonRelease-1>', self.resizeUp)
@@ -27,8 +27,8 @@ class WhacmeCommands():
 		self.owner.main.text.bind('<<Modified>>', self.modified)
 		
 		
-		self.owner.main.text.bind('<Button-2>', self.runCommand)
-		self.owner.main.text.bind('<Button-3>', self.openLocation)
+		self.owner.side.text.bind('<Button-2>', self.runCommand)
+		self.owner.side.text.bind('<Button-3>', self.openLocation)
 		self.owner.side.text.bind('<<PasteSelection>>', lambda e: 'break')
 	
 	def resizeDown(self, event):
@@ -90,8 +90,11 @@ class WhacmeCommands():
 		self.owner.main.text.tag_remove('highlightText', '1.0', 'end')
 		self.owner.side.text.tag_remove('highlightText', '1.0', 'end')
 
-	def openLocation(self, event):
-		loc = getCommand(event)
+	def openLocation(self, event, path='nopath'):
+		if path == 'nopath':
+			loc = self.getCommand(event)
+		else:
+			loc = path
 		
 		# if we currently have a file as the path, back up before working
 		oldPath = self.owner.path

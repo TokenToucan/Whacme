@@ -51,5 +51,5 @@ class WhacmeWindow(tk.Frame):
 		self.cmd = cmdClass(self)
 		
 		# finally, open up whatever we've been sent as a path
-		self.cmd.openLocation(path)
+		self.cmd.openLocation(None, path)
 
